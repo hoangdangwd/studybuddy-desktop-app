@@ -1,72 +1,115 @@
-# 📚 StudyBuddy - Desktop App
+# 📚 StudyBuddy — Real-Time Study Collaboration Platform & Desktop App
 
-Môi trường học tập hiệu quả với phòng học video, ghi chú, và chế độ tập trung.
-Desktop app được xây dựng trên nền Electron.
+[![Live Web Demo](https://img.shields.io/badge/Live%20Demo-Cloudflare%20Pages-brightgreen)](https://studybuddy-app-e1a.pages.dev)
+[![Electron](https://img.shields.io/badge/Desktop-Electron-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
+[![Node.js](https://img.shields.io/badge/Backend-Node.js%20%26%20Express-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Socket.io](https://img.shields.io/badge/Realtime-Socket.io-010101?logo=socket.io&logoColor=white)](https://socket.io/)
+[![WebRTC](https://img.shields.io/badge/Video-WebRTC-333333?logo=webrtc&logoColor=white)](https://webrtc.org/)
 
-## 🚀 Cài đặt & Chạy
+An all-in-one productivity and peer-accountability study platform built as a cross-platform desktop application using **Electron** with an embedded **Node.js/Express** server, and also deployable as a standalone web application.
+
+🔗 **Live Web Demo:** [https://studybuddy-app-e1a.pages.dev](https://studybuddy-app-e1a.pages.dev)
+
+---
+
+## 🌟 Key Features
+
+- **👥 Peer-Pressure Study Rooms (WebRTC & Socket.io):**
+  - Multi-user virtual study rooms with camera/audio stream management via WebRTC mesh connections.
+  - Real-time room presence, chat, and status indicators synchronized using Socket.io.
+- **🧠 Distraction Memo & Quick Capture:**
+  - Floating distraction logger allowing learners to offload random thoughts without breaking concentration.
+  - Tagging, priority sorting, and post-session review workflows.
+- **⏱️ Deep Focus Mode & Pomodoro Engine:**
+  - Full-screen distraction-free focus workspace with customizable session timers.
+  - Ambient background sound player (Lo-fi, White Noise, Nature sounds) for focus enhancement.
+- **📊 Focus Analytics Dashboard:**
+  - Session statistics, daily focus graphs, and habit streaks stored locally using **IndexedDB**.
+- **🖥️ Native Desktop OS Integration:**
+  - **System Tray Support:** Minimize the app to the taskbar system tray during study sessions with quick action menus.
+  - **Single-Instance Lock:** Prevents redundant processes from running concurrently.
+  - **IPC Bridge (`preload.js`):** Secure context-isolated bridge between Electron main process and renderer.
+
+---
+
+## 🏗️ Architecture Overview
+
+StudyBuddy utilizes a hybrid embedded architecture:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Electron Wrapper                       │
+│                                                             │
+│   ┌────────────────────┐            ┌───────────────────┐   │
+│   │ Main Process       │◄─── IPC ───┤ Renderer Process  │   │
+│   │ (Tray, Window, OS) │            │ (UI, WebRTC, SPA) │   │
+│   └─────────┬──────────┘            └─────────┬─────────┘   │
+│             │                                 │             │
+│             ▼                                 │             │
+│   ┌────────────────────┐                      │             │
+│   │ Embedded Express   │◄── Socket.io / HTTP ─┘             │
+│   │ & Socket Server    │                                    │
+│   └────────────────────┘                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+The application can also run purely in web mode without Electron:
+- **Renderer (`public/`):** Pure vanilla JavaScript + modular CSS architecture for maximum performance and zero build dependencies.
+- **Storage:** Local-first architecture using `localStorage` and `IndexedDB`.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18.x or newer
+- npm or yarn
+
+### Installation
 
 ```bash
-# 1. Cài dependencies (bao gồm Electron)
+# Clone the repository
+git clone https://github.com/hoangdangwd/studybuddy-desktop-app.git
+cd studybuddy-desktop-app
+
+# Install dependencies
 npm install
+```
 
-# 2. Chạy desktop app
+### Running the App
+
+#### Option A: Run as Desktop App (Electron)
+```bash
 npm run dev
+```
 
-# 3. Chạy web-only mode (không cần Electron)
+#### Option B: Run as Web-Only Mode
+```bash
 npm run web
-# Mở http://localhost:3000
+# Open http://localhost:3000 in your browser
 ```
 
-## 📁 Cấu trúc dự án
+---
+
+## 📁 Project Structure
 
 ```
-├── main.js                   # Electron main process (cửa sổ, tray)
-├── preload.js                # Electron preload (OS API bridge)
-├── server.js                 # Express + Socket.io server (nhúng trong app)
-├── package.json              # Dependencies
-├── public/                   # Frontend (renderer process)
-│   ├── index.html            # SPA entry point
-│   ├── css/                  # Stylesheets (modular)
-│   │   ├── variables.css     # Design tokens
-│   │   ├── base.css          # Reset, animations
-│   │   ├── components.css    # Buttons, modals, forms
-│   │   ├── home.css          # Home page
-│   │   ├── room.css          # Video room
-│   │   ├── memo.css          # Memo page
-│   │   ├── focus.css         # Focus mode
-│   │   ├── bgm.css           # BGM player
-│   │   └── responsive.css    # Responsive window
+├── main.js                   # Electron main process (lifecycle, system tray, window)
+├── preload.js                # Secure ContextBridge for native OS capabilities
+├── server.js                 # Embedded Express + Socket.io signaling server
+├── public/                   # Frontend SPA assets
+│   ├── index.html            # Main single-page application entry point
+│   ├── memo.html             # Standalone distraction memo interface
+│   ├── css/                  # Modular styling (variables, room, focus, toast, etc.)
 │   ├── js/
-│   │   ├── app.js            # Main app, router
-│   │   ├── utils/            # Helpers, toast, storage (IndexedDB)
-│   │   ├── services/         # Socket, media, WebRTC, BGM
-│   │   └── pages/            # Home, room, memo, focus
-│   └── assets/sounds/        # BGM audio files
+│   │   ├── app.js            # App controller and router
+│   │   ├── services/         # Socket.io, WebRTC, Media, Audio services
+│   │   ├── pages/            # Home, room, focus, memo view logic
+│   │   └── utils/            # IndexedDB storage and UI helpers
+│   └── assets/               # Audio files and icons
 ```
 
-## 🔧 Tech Stack
+---
 
-- **Desktop**: Electron (Chromium + Node.js)
-- **Frontend**: HTML + CSS + Vanilla JavaScript
-- **Backend**: Node.js + Express + Socket.io (nhúng trong Electron)
-- **Storage**: localStorage + IndexedDB (client-side)
-- **Video**: WebRTC
-- **Realtime**: Socket.io
-
-## 🖥️ Tính năng Desktop
-
-- Cửa sổ desktop native với kích thước cố định
-- System Tray — thu nhỏ vào khay hệ thống, click phải để tham gia lại phòng
-- Single instance — chỉ mở 1 cửa sổ app
-- Preload bridge — sẵn sàng cho chức năng khóa app/thông báo (Task 19-24)
-- Vẫn chạy được web-only mode bằng `npm run web`
-
-## 👥 Nhóm phát triển
-
-ITSS2 - Urara Team
-
-## 📝 Ghi chú
-
-- Prototype cũ được giữ lại ở root (`index.html`, `style.css`, `app.js`) để tham khảo
-- Desktop app chạy Electron → load web từ `public/` qua embedded server
-- `npm run web` vẫn chạy web thuần không cần Electron
+## 📄 License
+MIT License. Free for personal and commercial study productivity.
